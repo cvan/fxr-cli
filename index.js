@@ -10,6 +10,8 @@ const commandLineUsage = require('command-line-usage');
 const fs = require('fs-extra');
 const logger = require('loggy');
 
+process.on('exit', () => process.exit(logger.errorHappened ? 1 : 0));
+
 const commands = require('./commands/index.js');
 const parseOptions = require('./lib/parseCli.js').parseOptions;
 const pkgJson = require('./package.json');
@@ -220,7 +222,8 @@ function platformAction (action, url, defaults = {}) {
   const platformStr = pluralise('platform', 'platforms', options.platformsSlugs.length);
   const platformListStr = options.platformsSlugs.join('", "');
   return new Promise((resolve, reject) => {
-    logger.log(`${uppercaseFirstLetter(actionPresentStr)} ${platformStr} "${platformListStr}" …`);
+    const loggerPlatform = (str, level) => utils.loggerPlatform(platform, str, level);
+    loggerPlatform(uppercaseFirstLetter(actionPresentStr)} ${platformStr});
     return commands[action].run({
       platformsSlugs: options.platformsSlugs,
       forceUpdate: options.forceUpdate,
@@ -233,7 +236,7 @@ function platformAction (action, url, defaults = {}) {
         return;
       }
       if (completed) {
-        logger.log(`Successfully ${actionPastStr} ${platformStr} "${platformListStr}"`);
+        loggerPlatform(`${actionPastStr} ${platformStr} "${platformListStr}"`);
         process.exit(0);
       }
     }).catch(err => {

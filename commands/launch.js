@@ -1,8 +1,10 @@
 const path = require('path');
 
 const logger = require('loggy');
+logger.notificationsTitle = 'fxr';
 const shell = require('shelljs');
 
+const pkgJson = require('../package.json');
 const SETTINGS = require('../lib/settings.js').settings;
 const utils = require('../lib/utils.js');
 
@@ -36,13 +38,14 @@ function launch (options = {}, attempts = 0, abort = false) {
     platformsSlugs: options.platformsSlugs || [SETTINGS.platform_default],
     forceUpdate: options.forceUpdate,
     url: options.url,
-    verbose: options.verbose,
-    indent: options.indent || ''
+    verbose: options.verbose
   }, options);
   const silent = !options.verbose;
 
   let result = utils.requireAdb(options.forceUpdate).then(adb => {
     return options.platformsSlugs.map(platform => {
+      const loggerPlatform = (str, level) => utils.loggerPlatform(platform, str, level);
+
       // TODO: Check if the platform's APK is first installed on the device.
       const dirPlatform = path.resolve(PATHS.downloads, platform);
       const pathApk = shell.find(path.join(dirPlatform, '*.apk'));
@@ -52,7 +55,7 @@ function launch (options = {}, attempts = 0, abort = false) {
 
       const devices = shell.exec(`${adb} devices`, {silent});
       if (devices.stdout === 'List of devices attached\n\n') {
-        logger.log(`${options.indent}Put on your VR headset`);
+        loggerPlatform(`Put on your VR headset`);
         if (!RETRY || RETRY_DELAY <= 0) {
           throw new Error('Could not find connected device');
         }
@@ -70,12 +73,20 @@ function launch (options = {}, attempts = 0, abort = false) {
         reset();
       }
 
+      let cmd;
       if (options.url) {
-        logger.log(`${options.indent}Launching ${options.url} …`);
-        shell.exec(`${adb} shell am start -a android.intent.action.VIEW -d "${options.url}" org.mozilla.vrbrowser/.VRBrowserActivity`, {silent});
+        cmd = shell.exec(`${adb} shell am start -a android.intent.action.VIEW -d "${options.url}" org.mozilla.vrbroxwser/.VRBrowserActivity`, {silent});
       } else {
-        logger.log(`${options.indent}Launching …`);
-        shell.exec(`${adb} shell am start -n org.mozilla.vrbrowser/.VRBrowserActivity`, {silent});
+        cmd = shell.exec(`${adb} shell am start -n org.mozilla.vrbrowser/.VRBrowserActivity`, {silent});
+      }
+
+      let errMsg;
+      if (cmd.stderr.startsWith('Error')) {
+        errMsg = `Could not launch ${options.url ? options.url : pkgJson.productName}`;
+        loggerPlatform(errMsg, 'error');
+        throw new Error(errMsg);
+      } else {
+        loggerPlatform(`Launched ${options.url ? options.url : pkgJson.productName}`, 'success');
       }
 
       // TODO: Return a Promise.
