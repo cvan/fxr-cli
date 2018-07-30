@@ -40,6 +40,7 @@
     "node-fetch": "^2.1.2",
     "picture-tube": "https://github.com/cvan/picture-tube#c8fc4c4",
     "shelljs": "^0.8.2",
+    "system-folders": "^1.0.114",
     "testcafe": "^0.20.4"
   },
   "devDependencies": {

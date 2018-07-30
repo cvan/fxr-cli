@@ -21,9 +21,26 @@ const utils = require('./lib/utils.js');
 const pluralise = utils.pluralise;
 const uppercaseFirstLetter = utils.uppercaseFirstLetter;
 
-const validCommands = [null, 'download', 'install', 'launch', 'test', 'version', 'help'];
+const validCommands = [
+  null,
+  'capture',
+  'download',
+  'help',
+  'install',
+  'launch',
+  'test',
+  'version'
+];
 
 switch (process.argv[2]) {
+  case 'video':
+  case 'videos':
+  case 'screenshot':
+  case 'screenshots':
+  case 'screen':
+  case 'record':
+    process.argv[2] = 'capture';
+    break;
   case 'fetch':
     process.argv[2] = 'download';
     break;
@@ -178,6 +195,10 @@ function help () {
   }
 }
 
+function capture () {
+  return platformAction('capture');
+}
+
 function download () {
   return platformAction('download');
 }
@@ -207,6 +228,11 @@ function platformAction (action, url, defaults = {}) {
     let displayLogAfter = true;
     let displayError = true;
     switch (action) {
+      case 'capture':
+        actionPresentStr = 'capturing';
+        actionPastStr = 'captured';
+        displayLogAfter = false;
+        break;
       case 'download':
         actionPresentStr = 'downloading';
         actionPastStr = 'downloaded';
@@ -273,6 +299,9 @@ function platformAction (action, url, defaults = {}) {
 }
 
 switch (command) {
+  case 'capture':
+    capture();
+    break;
   case 'download':
     download();
     break;

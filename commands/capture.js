@@ -14,7 +14,7 @@ const PATHS = SETTINGS.paths;
 
 function install (options = {}, attempts = 0, downloaded = false) {
   let timeoutRetry = null;
-  let hasDownloaded = false;
+  let downloaded = false;
   const reset = () => {
     clearTimeout(timeoutRetry);
     attempts = 0;
@@ -51,8 +51,8 @@ function install (options = {}, attempts = 0, downloaded = false) {
 
     // TODO: Check if the platform's APK is first installed on the device.
     if (options.forceUpdate || !apkLocalPath || !fs.existsSync(apkLocalPath)) {
-      loggerPlatform('Downloading');
-      hasDownloaded = true;
+      loggerPlatform('Downloading', 'log');
+      downloaded = true;
       return download.run(options)
         .then(async () => {
           try {
@@ -117,7 +117,7 @@ function install (options = {}, attempts = 0, downloaded = false) {
       loggerPlatform(`${actionStr} ${launchedObjStr}${versionStr}`, 'success');
       resolve({
         platform,
-        downloaded: hasDownloaded,
+        downloaded,
         installed: true,
         updated: !freshInstall
       });
