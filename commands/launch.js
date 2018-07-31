@@ -13,7 +13,7 @@ const LIBRARY_NAME = pkgJson.libraryName || (pkgJson.bin && Object.keys(pkgJson.
 const MAX_ATTEMPTS = 10; // Number of times to attempt to connect to the device.
 const PATHS = SETTINGS.paths;
 const RETRY_DELAY = 3000; // Time to delay between attempts in milliseconds (default: 3 seconds).
-const RETRY = true; // Whether to attempt to retry the launch.
+const RETRY = true; // Whether to attempt to retry the command.
 
 let forceAbort = false;
 const setForceAbort = () => {
